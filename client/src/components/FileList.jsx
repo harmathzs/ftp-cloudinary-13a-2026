@@ -28,6 +28,7 @@ export default function FileList({ title, endpoint, refreshKey, imageOnly }) {
       <h2>{title}</h2>
       <ul className='file-list'>
         {files.map( file => <li key={file}>
+          {/** TODO - clickable links show content */}
           {file.name}
         </li> )}
       </ul>
