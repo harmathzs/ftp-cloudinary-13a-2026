@@ -14,12 +14,39 @@ import { toast } from 'react-toastify';
  * @returns {JSX.Element}
  */
 export default function FileUpload({ title, icon, endpoint, accept, imageOnly, onUploaded }) {
+  const [file, setFile] = useState(null)
+  
+  const handleFormSubmit = (e) => {
+    e.preventDefault()
 
+    if (file) {
+      const body = new FormData()
+      body.append('file', file)
+      fetch(endpoint, {
+        method: 'POST',
+        body
+      })
+      .then(console.log)
+      .catch(console.warn)
+      .finally( ()=>{} )
+    } else {
+      return toast.warn('Choose a file first!')
+    }
+  }
+
+  const handleUploadInputChange = (e) => {
+    console.log('e.target.files', e?.target?.files)
+    if (e?.target?.files && e?.target?.files[0]) {
+      setFile(e?.target?.files[0])
+    }
+  }
 
   return (
-    <form className="card" >
-
-      <input  type="file" accept={accept}  />
+    <form className="card" onSubmit={handleFormSubmit}>
+      <h2>
+        {icon} {title}
+      </h2>
+      <input name='file' id='file' type="file" accept={accept} onChange={handleUploadInputChange} />
 
 
       <button type="submit" >

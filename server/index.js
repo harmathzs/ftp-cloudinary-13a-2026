@@ -45,8 +45,31 @@ cloudinary.config({
  * Responds with { message, name }.
  */
 app.post('/api/upload/ftp', upload.single('file'), async (req, res) => {
-   return res.status(400).json({ error: 'No file provided' });
-
+  console.log('req.body', req.body)
+  console.log('req.file', req.file)
+  if (!req.file) return res.status(400).json({ error: 'No file provided' });
+  console.log('before instantiate')
+  const ftpClient = new Client()
+  try {
+    console.log('ok?')
+    await ftpClient.access({
+      host: '192.168.56.1', 
+      port: 21,
+      user: 'tester',
+      password: 'password',
+      secure: 'true'
+    })
+    //ftpClient.ftp.verbose = true
+    //await ftpClient.ensureDir('/')
+    const name = path.basename(req.file.originalname)
+    console.log('name', name)
+    await ftpClient.uploadFrom(Readable.from(req.file.buffer), name)
+    await ftpClient.close()
+    return res.status(201).json({message: 'Uploaded to FTP'})
+  } catch (error) {
+    console.warn(error)
+    return res.status(500).json({error})
+  }
 });
 
 /**
@@ -74,9 +97,21 @@ const ftpAccess = (client) =>
 
 /** GET /api/files/ftp - lists files in the FTP remote dir as [{ name, size }]. */
 app.get('/api/files/ftp', async (_req, res) => {
-
+  const client = new Client()
+  await client.access({
+      host: '192.168.56.1', 
+      port: 21,
+      user: 'tester',
+      password: 'password',
+      secure: 'true'
+    })
+  const list = await client.list()
+  if (list) {
+    await client.close()
+    res.status(200).json({ list })
+  } else {
     res.status(500).json({ error: 'FTP list failed: '  });
-
+  }
 });
 
 /** GET /api/files/ftp/:name - streams one FTP file to the response as a download. */
