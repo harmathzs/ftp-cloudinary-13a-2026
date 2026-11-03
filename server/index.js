@@ -48,20 +48,23 @@ app.post('/api/upload/ftp', upload.single('file'), async (req, res) => {
   console.log('req.body', req.body)
   console.log('req.file', req.file)
   if (!req.file) return res.status(400).json({ error: 'No file provided' });
-
-  const ftpClient = Client()
+  console.log('before instantiate')
+  const ftpClient = new Client()
   try {
+    console.log('ok?')
     await ftpClient.access({
       host: '192.168.56.1', 
       port: 21,
       user: 'tester',
       password: 'password',
-      secure: true
+      secure: 'true'
     })
     //ftpClient.ftp.verbose = true
     //await ftpClient.ensureDir('/')
-    await ftpClient.uploadFrom(Readable.from(req.file.buffer), path.basename(req.file.originalname))
-    //await ftpClient.close()
+    const name = path.basename(req.file.originalname)
+    console.log('name', name)
+    await ftpClient.uploadFrom(Readable.from(req.file.buffer), name)
+    await ftpClient.close()
     return res.status(201).json({message: 'Uploaded to FTP'})
   } catch (error) {
     console.warn(error)
