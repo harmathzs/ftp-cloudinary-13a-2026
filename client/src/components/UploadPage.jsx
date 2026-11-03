@@ -34,7 +34,9 @@ export default function UploadPage() {
             imageOnly={true}
           />
           <FileList
-
+            title='Cloudinary Images'
+            endpoint='http://localhost:5000/api/files/cloudinary'
+            imageOnly={true}
           />
         </div>
       </div>
